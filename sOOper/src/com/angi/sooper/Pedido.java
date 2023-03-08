@@ -43,7 +43,15 @@ public class Pedido implements IPedido {
      */
     @Override
     public Set<IProducto> getProductos() {
-        return null;
+        Set<IProducto> productos=null;
+        for (IContenedor c: contenedores) {
+            if(productos==null){
+                productos=c.getProductos();
+            }else {
+                productos.addAll(c.getProductos());
+            }
+        }
+        return productos;
     }
 
     /**
@@ -67,13 +75,33 @@ public class Pedido implements IPedido {
     }
 
     /**
-     * Agrega el producto al pedido.
+     * Agrega el producto al contenedor de un pedido.
      *
      * @param producto tipo de producto agregado.
-     * @return el producto agregado al pedido.
+     * @return el contenedor en el que se ha colocado el producto, si es null no ha localizado el contenedor para el producto.
      */
     @Override
     public IContenedor addProducto(IProducto producto) {
+        for (IContenedor contenedor: contenedores) {
+            if(contenedor.meter(producto)){
+                return contenedor;
+            }
+        }
         return null;
+    }
+
+    /**
+     * Imprime información el pedido.
+     *
+     * @return información completa del pedido.
+     */
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("Pedido: " + referencia + "\n");
+        for (IContenedor contenedor : contenedores) {
+            sb.append("\t" + contenedor + "\n");
+        }
+        return sb.toString();
     }
 }

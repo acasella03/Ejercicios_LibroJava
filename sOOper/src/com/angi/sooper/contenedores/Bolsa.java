@@ -18,8 +18,8 @@ public class Bolsa extends Contenedor {
      * @param alto       del contenedor Bolsa.
      * @param ancho      del contenedor Bolsa.
      */
-    public Bolsa(String referencia, int alto, int ancho) {
-        super(referencia, alto);
+    public Bolsa(String referencia, int alto, int ancho, int resistencia) {
+        super(referencia, alto, resistencia);
         this.ancho = ancho;
     }
 

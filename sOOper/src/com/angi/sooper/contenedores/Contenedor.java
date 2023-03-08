@@ -3,6 +3,7 @@ package com.angi.sooper.contenedores;
 import com.angi.sooper.IContenedor;
 import com.angi.sooper.IProducto;
 
+import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -26,15 +27,19 @@ public abstract class Contenedor implements IContenedor {
      */
     private Set<IProducto> producto;
 
+    private Set<IProducto> productos;
+
     /**
      * Constructor parametrizado.
      *
      * @param referencia del contenedor.
      * @param alto       del contenedor.
      */
-    public Contenedor(String referencia, int alto) {
+    public Contenedor(String referencia, int alto, int resistencia) {
         this.referencia = referencia;
         this.alto = alto;
+        this.resistencia = resistencia;
+        productos = new HashSet<IProducto>();
     }
 
     /**
@@ -64,7 +69,21 @@ public abstract class Contenedor implements IContenedor {
      */
     @Override
     public int volumenDisponible() {
-        return 0;
+
+        return getVolumen() - volumenOcupado();
+    }
+
+    /**
+     * Realiza la suma el volumen de cada uno de los productos del contenedor.
+     *
+     * @return suma del volumen total de productos del contenedor.
+     */
+    private int volumenOcupado() {
+        int res = 0;
+        for (IProducto p : productos) {
+            res += p.getVolumen();
+        }
+        return res;
     }
 
     /**
@@ -95,7 +114,21 @@ public abstract class Contenedor implements IContenedor {
      */
     @Override
     public boolean meter(IProducto producto) {
-        return false;
+        boolean resistenciaOK = resiste(producto);
+        boolean volumenOK = producto.tengoEspacio(this);
+        boolean compatibilidadOK = true;
+
+        for (IProducto p : productos) {
+            boolean compatibleOK = producto.esCompatible(p);
+            compatibilidadOK &= compatibleOK;
+        }
+
+        boolean acepta = resistenciaOK && volumenOK && compatibilidadOK;
+        if (acepta) {
+            productos.add(producto);
+            producto.meter(this);
+        }
+        return acepta;
     }
 
     /**
@@ -106,6 +139,20 @@ public abstract class Contenedor implements IContenedor {
      */
     @Override
     public boolean resiste(IProducto producto) {
-        return false;
+        return resistencia > producto.getPeso();
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder("Contenedor " + referencia + " [" + getTipo() + "] (sup " + getSuperficie() + "cm2 - vol " + getVolumen() +
+                "cm3 - resistencia " + getResistencia() + " g).\n");
+        if (productos.isEmpty()) {
+            sb.append("\t\tvacío\n");
+        }
+        for (IProducto p : productos) {
+            sb.append("\t\t" + p + "\n");
+        }
+        sb.append("\t\t>> Disponible vol " + volumenDisponible() + "cm3");
+        return sb.toString();
     }
 }
